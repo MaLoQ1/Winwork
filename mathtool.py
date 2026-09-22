@@ -1,91 +1,81 @@
-# mathtool.py
+"""Точка входа приложения mathtool."""
+
 import sys
-import math
 
-MAX_VALUE = 10000
+from cli import build_parser
+from calc import equation
 
-def print_help():
-    """Выводит справочную информацию о программе."""
-    help_text = """mathtool --- решение уравнений вида A*x^2 + B*x + C = 0
 
-Использование:
-  python mathtool.py                 вывод справки
-  python mathtool.py --help          вывод справки
-  python mathtool.py solve           ввод коэффициентов с клавиатуры
-  python mathtool.py solve -a 1 -b -3 -c 2   решение с заданными коэффициентами
-
-Коэффициенты A, B, C --- целые числа, по модулю не превышающие 10000."""
-    print(help_text)
-
-def solve_equation(a, b, c):
-    """Решает уравнение A*x^2 + B*x + C = 0 и выводит результат."""
-    if a == 0:
-        if b != 0:
-            print("Уравнение линейное")
-            x = -c / b
-            print(f"x = {x:.3f}")
-        else:
-            print("ОШИБКА: это не уравнение, неизвестное отсутствует.", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("Уравнение квадратное")
-        d = b*b - 4*a*c
-        print(f"D = {d}")
-
-        if d > 0:
-            sqrt_d = math.sqrt(d)
-            x1 = (-b + sqrt_d) / (2*a)
-            x2 = (-b - sqrt_d) / (2*a)
-            print(f"x1 = {x1:.3f}")
-            print(f"x2 = {x2:.3f}")
-        elif d == 0:
-            x = -b / (2*a)
-            print(f"x = {x:.3f}")
-        else:
-            print("Действительных корней нет")
-
-def main():
-    args = sys.argv
-
-    if len(args) == 1 or (len(args) == 2 and args[1] == "--help"):
-        print_help()
-        sys.exit(0)
-
-    if args[1] != "solve":
-        print("ОШИБКА: неизвестная команда.", file=sys.stderr)
-        sys.exit(1)
-
-    a = b = c = None
-
-    if len(args) == 2:
+def handle_solve(args):
+    """Обработчик команды solve."""
+    # Коэффициенты: либо все три параметра, либо все три с клавиатуры
+    if args.a is None and args.b is None and args.c is None:
         try:
-            print("Введите коэффициенты:")
             a = int(input("Введите A: "))
             b = int(input("Введите B: "))
             c = int(input("Введите C: "))
         except ValueError:
-            print("ОШИБКА: коэффициент не является целым числом.", file=sys.stderr)
-            sys.exit(1)
-    elif len(args) == 8:
-        if (args[2] != "-a") or (args[4] != "-b") or (args[6] != "-c"):
-            print("ОШИБКА: неизвестный параметр. Используйте -a, -b, -c.", file=sys.stderr)
-            sys.exit(1)
-        try:
-            a = int(args[3])
-            b = int(args[5])
-            c = int(args[7])
-        except ValueError:
-            print("ОШИБКА: коэффициент не является целым числом.", file=sys.stderr)
-            sys.exit(1)
+            print("ОШИБКА: коэффициент не является целым числом",
+                  file=sys.stderr)
+            return 1
+    elif args.a is not None and args.b is not None and args.c is not None:
+        a, b, c = args.a, args.b, args.c
     else:
-        print("ОШИБКА: неверный набор параметров.", file=sys.stderr)
-        sys.exit(1)
+        print("ОШИБКА: укажите все три коэффициента либо ни одного",
+              file=sys.stderr)
+        return 1
 
-    if abs(a) > MAX_VALUE or abs(b) > MAX_VALUE or abs(c) > MAX_VALUE:
-        print("ОШИБКА: значение коэффициента вне допустимого диапазона (±10000).", file=sys.stderr)
-        sys.exit(1)
+    # Расчёт
+    try:
+        result = equation.solve(a, b, c)
+    except equation.EquationError as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
 
-    solve_equation(a, b, c)
+    # Вывод
+    if result['kind'] == 'линейное':
+        print("Уравнение линейное")
+        print(f"x = {result['roots'][0]:.3f}")
+    else:
+        print("Уравнение квадратное")
+        print(f"Дискриминант: {result['discriminant']}")
+        roots = result['roots']
+        if len(roots) == 2:
+            print(f"x1 = {roots[0]:.3f}")
+            print(f"x2 = {roots[1]:.3f}")
+        elif len(roots) == 1:
+            print(f"x = {roots[0]:.3f}")
+        else:
+            print("Действительных корней нет")
+    return 0
+
+
+def main(argv):
+    """Точка входа: разбор параметров, вызов обработчика."""
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    if args.command is None:
+        parser.print_help()
+        return 0
+
+    handlers = {
+        'solve': handle_solve,
+        # stats, series, integrate добавим позже
+    }
+
+    handler = handlers.get(args.command)
+    if handler is None:
+        print(f"ОШИБКА: команда '{args.command}' ещё не реализована",
+              file=sys.stderr)
+        return 1
+
+    try:
+        return handler(args)
+    except (ValueError, OSError) as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(sys.argv[1:]))
