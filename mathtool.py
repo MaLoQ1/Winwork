@@ -6,6 +6,7 @@ from cli import build_parser
 from calc import equation
 from calc import stats
 from calc import series
+from calc import integration
 
 
 def handle_solve(args):
@@ -126,6 +127,26 @@ def handle_series(args):
     print(f"Сумма ряда: {result:.{series.DIGITS}f}")
     return 0
 
+def handle_integrate(args):
+    """Обработчик команды integrate."""
+    if args.func not in integration.FUNCTIONS:
+        print(f"ОШИБКА: неизвестная функция '{args.func}'", file=sys.stderr)
+        return 1
+    f, formula, low, high, incl = integration.FUNCTIONS[args.func]
+
+    # Проверка ДО вывода формулы
+    try:
+        integration.check_params(args.start, args.end, args.steps,
+                                 low, high, incl)
+    except integration.IntegrationError as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+
+    print(formula)
+    result = integration.integrate(f, args.start, args.end, args.steps)
+    print(f"Значение интеграла: {result:.{integration.DIGITS}f}")
+    return 0
+
 def main(argv):
     """Точка входа: разбор параметров, вызов обработчика."""
     parser = build_parser()
@@ -139,6 +160,7 @@ def main(argv):
         'solve': handle_solve,
         'stats': handle_stats,
         'series': handle_series,
+        'integrate': handle_integrate,
     }
 
     handler = handlers.get(args.command)
