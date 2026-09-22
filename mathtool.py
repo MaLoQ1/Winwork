@@ -5,6 +5,7 @@ import sys
 from cli import build_parser
 from calc import equation
 from calc import stats
+from calc import series
 
 
 def handle_solve(args):
@@ -96,6 +97,35 @@ def handle_stats(args):
             print(f"{label}: {value:{form}}")
     return 0
 
+def handle_series(args):
+    """Обработчик команды series."""
+    try:
+        series.check_params(args.terms, args.eps)
+    except series.SeriesError as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+
+    if args.func not in series.FORMULAS:
+        print(f"ОШИБКА: неизвестный ряд '{args.func}'", file=sys.stderr)
+        return 1
+    term, formula = series.FORMULAS[args.func]
+
+    print(formula)
+
+    try:
+        if args.terms is not None:
+            result = series.sum_by_count(term, args.terms)
+            count = args.terms
+        else:
+            result, count = series.sum_by_eps(term, args.eps)
+    except series.SeriesError as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+
+    print(f"Слагаемых: {count}")
+    print(f"Сумма ряда: {result:.{series.DIGITS}f}")
+    return 0
+
 def main(argv):
     """Точка входа: разбор параметров, вызов обработчика."""
     parser = build_parser()
@@ -108,6 +138,7 @@ def main(argv):
     handlers = {
         'solve': handle_solve,
         'stats': handle_stats,
+        'series': handle_series,
     }
 
     handler = handlers.get(args.command)
