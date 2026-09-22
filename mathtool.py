@@ -4,6 +4,7 @@ import sys
 
 from cli import build_parser
 from calc import equation
+from calc import stats
 
 
 def handle_solve(args):
@@ -49,6 +50,51 @@ def handle_solve(args):
             print("Действительных корней нет")
     return 0
 
+def read_numbers(input_file):
+    """Читает числа из файла или stdin. Возбуждает ValueError/OSError."""
+    if input_file is not None:
+        source = open(input_file, encoding="utf-8-sig")
+    else:
+        source = sys.stdin
+
+    try:
+        values = []
+        for line in source:
+            for word in line.split():
+                try:
+                    values.append(float(word))
+                except ValueError:
+                    raise ValueError(f"{word} не является числом")
+        return values
+    finally:
+        if input_file is not None:
+            source.close()
+
+
+def handle_stats(args):
+    """Обработчик команды stats."""
+    try:
+        values = read_numbers(args.input)
+    except OSError:
+        print("ОШИБКА: файл не открывается", file=sys.stderr)
+        return 1
+    except ValueError as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+
+    try:
+        stats.check_numbers(values)
+    except stats.StatsError as error:
+        print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+
+    for label, function, form in stats.REPORT:
+        value = function(values)
+        if value is None:
+            print(f"{label}: НЕ СУЩЕСТВУЕТ")
+        else:
+            print(f"{label}: {value:{form}}")
+    return 0
 
 def main(argv):
     """Точка входа: разбор параметров, вызов обработчика."""
@@ -61,7 +107,7 @@ def main(argv):
 
     handlers = {
         'solve': handle_solve,
-        # stats, series, integrate добавим позже
+        'stats': handle_stats,
     }
 
     handler = handlers.get(args.command)
