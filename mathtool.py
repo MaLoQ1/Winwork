@@ -8,7 +8,6 @@ from calc import stats
 from calc import series
 from calc import integration
 
-
 def handle_solve(args):
     """Обработчик команды solve."""
     # Коэффициенты: либо все три параметра, либо все три с клавиатуры
