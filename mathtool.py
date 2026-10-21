@@ -1,12 +1,17 @@
 """Точка входа приложения mathtool."""
 
 import sys
-
+import time
 from cli import build_parser
 from calc import equation
 from calc import stats
 from calc import series
 from calc import integration
+
+# Импортируем наши новые модули
+from calc.arrays import read_array, write_array, fill_array, binary_search, MAX_SEARCH
+from calc.sorting import METHODS
+
 
 def handle_solve(args):
     """Обработчик команды solve."""
@@ -50,6 +55,7 @@ def handle_solve(args):
         else:
             print("Действительных корней нет")
     return 0
+
 
 def read_numbers(input_file):
     """Читает числа из файла или stdin. Возбуждает ValueError/OSError."""
@@ -97,6 +103,7 @@ def handle_stats(args):
             print(f"{label}: {value:{form}}")
     return 0
 
+
 def handle_series(args):
     """Обработчик команды series."""
     try:
@@ -126,6 +133,7 @@ def handle_series(args):
     print(f"Сумма ряда: {result:.{series.DIGITS}f}")
     return 0
 
+
 def handle_integrate(args):
     """Обработчик команды integrate."""
     if args.func not in integration.FUNCTIONS:
@@ -146,6 +154,70 @@ def handle_integrate(args):
     print(f"Значение интеграла: {result:.{integration.DIGITS}f}")
     return 0
 
+
+# --- НОВЫЕ ОБРАБОТЧИКИ ДЛЯ ЛАБОРАТОРНОЙ 3 ---
+
+def handle_fill(args):
+    """Обработчик команды fill."""
+    try:
+        arr = fill_array(args.count, args.min, args.max, args.seed)
+        write_array(arr, args.output)
+        return 0
+    except SystemExit:
+        return 1
+
+
+def handle_sort(args):
+    """Обработчик команды sort."""
+    try:
+        arr = read_array(args.input)
+    except SystemExit:
+        return 1
+
+    descending = (args.order == "desc")
+    method_func = METHODS[args.method]
+
+    # Замер времени строго вокруг сортировки
+    start_time = time.perf_counter()
+    method_func(arr, descending)
+    elapsed = time.perf_counter() - start_time
+    print(f"Время операции sort ({args.method}): {elapsed:.6f} с", file=sys.stderr)
+
+    write_array(arr, args.output)
+    print("Массив отсортирован.")
+    return 0
+
+
+def handle_search(args):
+    """Обработчик команды search."""
+    if abs(args.value) > MAX_SEARCH:
+        print(f"ОШИБКА: модуль искомого значения не должен превышать {MAX_SEARCH}", file=sys.stderr)
+        return 1
+
+    try:
+        arr = read_array(args.input)
+    except SystemExit:
+        return 1
+
+    # Проверка на упорядоченность по возрастанию
+    for i in range(len(arr) - 1):
+        if arr[i] > arr[i + 1]:
+            print("ОШИБКА: массив не упорядочен по возрастанию", file=sys.stderr)
+            return 1
+
+    start_time = time.perf_counter()
+    index = binary_search(arr, args.value)
+    elapsed = time.perf_counter() - start_time
+    print(f"Время операции search: {elapsed:.6f} с", file=sys.stderr)
+
+    if index is None:
+        print(f"Значение {args.value} не найдено.")
+        return 1
+
+    print(f"Значение {args.value} имеет элемент с индексом {index + 1}.")
+    return 0
+
+
 def main(argv):
     """Точка входа: разбор параметров, вызов обработчика."""
     parser = build_parser()
@@ -160,6 +232,9 @@ def main(argv):
         'stats': handle_stats,
         'series': handle_series,
         'integrate': handle_integrate,
+        'fill': handle_fill,
+        'sort': handle_sort,
+        'search': handle_search,
     }
 
     handler = handlers.get(args.command)

@@ -47,4 +47,30 @@ def build_parser():
     p.add_argument("--steps", type=int, required=True,
                    help="число шагов (1..100000)")
 
+    # --- fill ---
+    p = subs.add_parser("fill", help="генерация массива",
+                        description="Создание массива случайных чисел.",
+                        allow_abbrev=False)
+    p.add_argument("-c", "--count", type=int, required=True, help="количество элементов")
+    p.add_argument("--min", type=int, default=-100, help="нижняя граница (по умолчанию -100)")
+    p.add_argument("--max", type=int, default=100, help="верхняя граница (по умолчанию 100)")
+    p.add_argument("--seed", type=int, help="начальное значение генератора")
+    p.add_argument("-o", "--output", help="файл для записи (по умолчанию вывод на экран)")
+
+    # --- sort ---
+    p = subs.add_parser("sort", help="сортировка массива",
+                        description="Сортировка массива чисел.",
+                        allow_abbrev=False)
+    p.add_argument("-m", "--method", required=True, choices=["bubble", "selection", "insertion", "counting"], help="метод сортировки")
+    p.add_argument("--order", choices=["asc", "desc"], default="asc", help="направление сортировки")
+    p.add_argument("-i", "--input", help="файл с исходным массивом")
+    p.add_argument("-o", "--output", help="файл для результата")
+
+    # --- search ---
+    p = subs.add_parser("search", help="двоичный поиск",
+                        description="Поиск элемента в отсортированном массиве.",
+                        allow_abbrev=False)
+    p.add_argument("-v", "--value", type=int, required=True, help="искомое значение")
+    p.add_argument("-i", "--input", help="файл с массивом")
+
     return parser
