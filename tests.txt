@@ -396,3 +396,13 @@ python mathtool.py sort -m bubble -i big_data_42.txt -o big_sorted_42_bubble.txt
 2. Из методов сравнения быстрее всего работают quick (быстрая), затем merge (слиянием) и heap (пирамидальная). Их сложность O(n log n).
 3. Старые методы (bubble, selection, insertion) имеют сложность O(n^2), поэтому с ростом n (от 1000 до 10000) их время работы растет квадратично (в 10 раз больше данных = в 100 раз дольше).
 4. Время работы новых методов растет гораздо медленнее, что соответствует их теоретической сложности.
+
+=== ЛАБОРАТОРНАЯ 5: Поиск, перемешивание и модульные тесты ===
+> python mathtool.py select -k 4 -i selection.txt --seed 1
+Ожидается: Значение порядковой статистики: 35; код 0
+> python mathtool.py select -k 0 -i selection.txt
+Ожидается: сообщение об ошибке в stderr; код 1
+> python mathtool.py select -k abc -i selection.txt
+Ожидается: ошибка argparse; код 2
+> python mathtool.py shuffle -i selection.txt --seed 1 -o shuffled.txt
+Ожидается: Массив перемешан.; записано 9 элементов.
