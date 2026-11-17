@@ -1,7 +1,7 @@
 import subprocess
 
 sizes = [1000, 3000, 10000]
-methods = ["bubble", "selection", "insertion", "counting"]
+methods = ["bubble", "selection", "insertion", "counting", "quick", "merge", "heap"]
 
 print("| Размер | Метод | Замер 1 | Замер 2 | Замер 3 | Среднее |")
 print("|---|---|---|---|---|---|")
