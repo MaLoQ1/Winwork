@@ -61,7 +61,7 @@ def build_parser():
     p = subs.add_parser("sort", help="сортировка массива",
                         description="Сортировка массива чисел.",
                         allow_abbrev=False)
-    p.add_argument("-m", "--method", required=True, choices=["bubble", "selection", "insertion", "counting"], help="метод сортировки")
+    p.add_argument("-m", "--method", required=True, choices=["bubble", "selection", "insertion", "counting", "quick", "merge", "heap"], help="метод сортировки")
     p.add_argument("--order", choices=["asc", "desc"], default="asc", help="направление сортировки")
     p.add_argument("-i", "--input", help="файл с исходным массивом")
     p.add_argument("-o", "--output", help="файл для результата")
