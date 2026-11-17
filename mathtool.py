@@ -7,6 +7,8 @@ from calc import equation
 from calc import stats
 from calc import series
 from calc import integration
+from calc.selection import statistic
+from calc.arrays import shuffle
 
 # Импортируем наши новые модули
 from calc.arrays import read_array, write_array, fill_array, binary_search, MAX_SEARCH
@@ -218,6 +220,36 @@ def handle_search(args):
     return 0
 
 
+def handle_select(args):
+    """Обработчик команды select."""
+    try:
+        arr = read_array(args.input)
+    except SystemExit:
+        return 1
+
+    try:
+        result = statistic(arr, args.rank, args.seed)
+    except ValueError as e:
+        print(f"ОШИБКА: {e}", file=sys.stderr)
+        return 1
+
+    print(f"Значение порядковой статистики: {result}")
+    return 0
+
+
+def handle_shuffle(args):
+    """Обработчик команды shuffle."""
+    try:
+        arr = read_array(args.input)
+    except SystemExit:
+        return 1
+
+    shuffle(arr, args.seed)
+    write_array(arr, args.output)
+    print("Массив перемешан.")
+    return 0
+
+
 def main(argv):
     """Точка входа: разбор параметров, вызов обработчика."""
     parser = build_parser()
@@ -235,6 +267,8 @@ def main(argv):
         'fill': handle_fill,
         'sort': handle_sort,
         'search': handle_search,
+        'select': handle_select,
+        'shuffle': handle_shuffle,
     }
 
     handler = handlers.get(args.command)

@@ -73,4 +73,16 @@ def build_parser():
     p.add_argument("-v", "--value", type=int, required=True, help="искомое значение")
     p.add_argument("-i", "--input", help="файл с массивом")
 
+    # --- select ---
+    p = subs.add_parser("select", help="поиск k-й порядковой статистики")
+    p.add_argument("-k", "--rank", type=int, required=True, help="номер статистики")
+    p.add_argument("-i", "--input", help="файл с исходным массивом")
+    p.add_argument("--seed", type=int, help="начальное значение генератора")
+
+    # --- shuffle ---
+    p = subs.add_parser("shuffle", help="перемешивание массива")
+    p.add_argument("-i", "--input", help="файл с исходным массивом")
+    p.add_argument("--seed", type=int, help="начальное значение генератора")
+    p.add_argument("-o", "--output", help="файл для результата")
+   
     return parser

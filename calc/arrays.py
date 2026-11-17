@@ -102,3 +102,12 @@ def binary_search(arr, target):
         else:
             right = mid - 1
     return None
+
+
+def shuffle(values, seed=None):
+    """Перемешивание Фишера-Йетса (на месте)."""
+    rng = random.Random(seed)
+    n = len(values)
+    for i in range(n - 1, 0, -1):
+        j = rng.randint(0, i)
+        values[i], values[j] = values[j], values[i]

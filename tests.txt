@@ -342,6 +342,30 @@ python mathtool.py sort -m selection -i big_data_42.txt -o big_sorted_42_selecti
 # 5.5 Сортировка пузырьком 
 python mathtool.py sort -m bubble -i big_data_42.txt -o big_sorted_42_bubble.txt
 
+=== ЛАБОРАТОРНАЯ 4: Оптимальные сортировки ===
+
+--- Проверка на example.txt (24 -76 81 43 -5) ---
+> python mathtool.py sort -m quick -i example.txt
+Ожидается: -76 -5 24 43 81
+
+> python mathtool.py sort -m merge --order desc -i example.txt
+Ожидается: 81 43 24 -5 -76
+
+> python mathtool.py sort -m heap -i example.txt -o sorted.txt
+Ожидается: Записано элементов: 5 в файл sorted.txt, Массив отсортирован.
+
+--- Проверка на одном элементе (файл one.txt с числом 5) ---
+> python mathtool.py sort -m quick -i one.txt
+Ожидается: 5
+
+--- Проверка на повторах (файл dup.txt: 5 5 3 3 1) ---
+> python mathtool.py sort -m quick -i dup.txt
+Ожидается: 1 3 3 5 5
+
+--- Проверка готового и обратного порядка ---
+(на файлах sorted.txt: 1 2 3 4 5 и reverse.txt: 5 4 3 2 1)
+> python mathtool.py sort -m heap -i reverse.txt
+Ожидается: 1 2 3 4 5
 
 | Размер | Метод | Замер 1 | Замер 2 | Замер 3 | Среднее |
 |---|---|---|---|---|---|
